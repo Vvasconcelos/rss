@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -105,7 +106,8 @@ func parseRSS2(data []byte) (*Feed, error) {
 		if len(item.Enclosures) > 0 {
 			next.Enclosures = make([]*Enclosure, len(item.Enclosures))
 			for i := range item.Enclosures {
-				next.Enclosures[i] = item.Enclosures[i].Enclosure()
+				next.Enclosures[i], err = item.Enclosures[i].Enclosure()
+				return nil, err
 			}
 		}
 		next.Read = false
@@ -164,15 +166,21 @@ type rss2_0Enclosure struct {
 	XMLName xml.Name `xml:"enclosure"`
 	URL     string   `xml:"url,attr"`
 	Type    string   `xml:"type,attr"`
-	Length  uint     `xml:"length,attr"`
+	Length  string   `xml:"length,attr"`
 }
 
-func (r *rss2_0Enclosure) Enclosure() *Enclosure {
+func (r *rss2_0Enclosure) Enclosure() (*Enclosure, error) {
 	out := new(Enclosure)
 	out.URL = r.URL
 	out.Type = r.Type
-	out.Length = r.Length
-	return out
+	if strings.ToLower(r.Length) != "none" {
+		lenghtValue, err := strconv.ParseUint(r.Length, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		out.Length = uint(lenghtValue)
+	}
+	return out, nil
 }
 
 type rss2_0Image struct {
