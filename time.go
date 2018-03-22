@@ -23,7 +23,6 @@ var TimeLayouts = []string{
 	"Jan _2, 2006 15:04 PM MST",
 	"Jan _2, 06 15:04 PM MST",
 	"_2 Jan 2006 15:04:05",
-	// "19 Mar 2018 05:00:00"
 	time.ANSIC,
 	time.UnixDate,
 	time.RubyDate,
